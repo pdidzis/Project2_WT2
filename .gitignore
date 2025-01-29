@@ -1,0 +1,9 @@
+
+mariadb/
+
+src/vendor/
+src/node_modules
+
+.vscode/
+.idea/
+.settings/

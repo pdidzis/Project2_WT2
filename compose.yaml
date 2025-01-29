@@ -1,0 +1,75 @@
+
+services:
+
+    # web server
+    # https://hub.docker.com/_/nginx
+    nginx:
+        container_name: pd2-nginx
+        image: nginx:latest
+        volumes:
+            - './nginx:/etc/nginx/templates'
+            - './src:/var/www/src'
+        ports:
+            - 80:80
+        environment:
+            - TZ=UTC
+            - PHP_CONTAINER_NAME=pd2-laravel
+            - SERVER_PORT=80
+            - SERVER_NAME=localhost
+            - DOCUMENT_ROOT=/var/www/src/public
+
+    # php
+    # https://hub.docker.com/_/php
+    php:
+        container_name: pd2-laravel
+        build: ./php
+        volumes:
+            - './src:/var/www/src'
+        working_dir: /var/www/src
+        ports:
+            - 9000:9000
+        environment:
+            - TZ=UTC
+            - APP_ROOT=/var/www/src
+
+    # database
+    # https://hub.docker.com/_/mariadb
+    mariadb:
+        container_name: pd2-database
+        image: mariadb:latest
+        volumes:
+            - './mariadb:/var/lib/mysql'
+        ports:
+            - 3306:3306
+        environment:
+            - TZ=UTC
+            - MARIADB_DATABASE=pd2
+            - MARIADB_USER=pd2admin
+            - MARIADB_PASSWORD=pd2pass
+            - MARIADB_ROOT_PASSWORD=root
+
+    # db gui
+    # https://hub.docker.com/_/phpmyadmin
+    phpmyadmin:
+        container_name: pd2-phpmyadmin
+        image: phpmyadmin:latest
+        ports:
+            - 8080:80
+        environment:
+            - TZ=UTC
+            - MYSQL_ROOT_PASSWORD=root
+            - PMA_HOST=pd2-database
+
+    # nodejs
+    # https://hub.docker.com/_/node
+    # node:
+    #     container_name: pd2-node
+    #     image: node:latest
+    #     volumes:
+    #         - './src:/var/www/src'
+    #     user: "node"
+    #     working_dir: /var/www/src
+    #     environment:
+    #         - NODE_ENV=production
+    #     command: tail -F anything
+
