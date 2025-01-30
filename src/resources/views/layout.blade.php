@@ -56,12 +56,25 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/">Home</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/authors">Authors</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/genres">Genres</a>
-                    </li>
+
+                    @if(Auth::check())
+                        <li class="nav-item">
+                            <a class="nav-link" href="/authors">Authors</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/genres">Genres</a> 
+                        </li>
+                        <li class="nav-item">
+                            <form action="/logout" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-link nav-link">Log out</button>
+                            </form>
+                        </li>
+                    @else
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Authenticate</a>
+                        </li>
+                    @endif
                 </ul>
             </div>
         </div>
