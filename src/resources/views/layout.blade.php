@@ -65,6 +65,9 @@
                             <a class="nav-link" href="/genres">Genres</a> 
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="/books">Books</a> <!-- ✅ Added Books section -->
+                        </li>
+                        <li class="nav-item">
                             <form action="/logout" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-link nav-link">Log out</button>

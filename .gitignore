@@ -7,3 +7,5 @@ src/node_modules
 .vscode/
 .idea/
 .settings/
+
+/public/images
