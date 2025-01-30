@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Http\Requests\BookRequest; // Import BookRequest
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 
 class BookController extends Controller implements HasMiddleware
@@ -54,41 +54,10 @@ class BookController extends Controller implements HasMiddleware
     }
 
     // Create new Book entry
-    public function put(Request $request): RedirectResponse
+    public function put(BookRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required|min:3|max:256',
-            'author_id' => 'required|exists:authors,id',
-            'genre_id' => 'required|exists:genres,id',
-            'description' => 'nullable',
-            'price' => 'nullable|numeric',
-            'year' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
-            'display' => 'nullable',
-        ]);
-
         $book = new Book();
-        $book->name = $validatedData['name'];
-        $book->author_id = $validatedData['author_id'];
-        $book->genre_id = $validatedData['genre_id'];
-        $book->description = $validatedData['description'];
-        $book->price = $validatedData['price'];
-        $book->year = $validatedData['year'];
-        $book->display = (bool) ($validatedData['display'] ?? false);
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            $uploadedFile = $request->file('image');
-            $extension = $uploadedFile->clientExtension();
-            $name = uniqid();
-            $book->image = $uploadedFile->storePubliclyAs(
-                '/',
-                $name . '.' . $extension,
-                'uploads'
-            );
-        }
-
-        $book->save();
+        $this->saveBookData($book, $request);
         return redirect('/books');
     }
 
@@ -110,28 +79,36 @@ class BookController extends Controller implements HasMiddleware
     }
 
     // Update existing Book entry
-    public function patch(Book $book, Request $request): RedirectResponse
+    public function patch(Book $book, BookRequest $request): RedirectResponse
     {
-        $validatedData = $request->validate([
-            'name' => 'required|min:3|max:256',
-            'author_id' => 'required|exists:authors,id',
-            'genre_id' => 'required|exists:genres,id',
-            'description' => 'nullable',
-            'price' => 'nullable|numeric',
-            'year' => 'required|numeric',
-            'image' => 'nullable|image|mimes:jpeg,png,webp|max:2048',
-            'display' => 'nullable',
-        ]);
+        $this->saveBookData($book, $request);
+        return redirect('/books/update/' . $book->id);
+    }
 
-        $book->name = $validatedData['name'];
-        $book->author_id = $validatedData['author_id'];
-        $book->genre_id = $validatedData['genre_id'];
-        $book->description = $validatedData['description'];
-        $book->price = $validatedData['price'];
-        $book->year = $validatedData['year'];
+    // Delete a Book
+    public function delete(Book $book): RedirectResponse
+    {
+        if ($book->image) {
+            @unlink(public_path('images/' . $book->image)); // Delete image file
+        }
+        $book->delete();
+        return redirect('/books');
+    }
+
+    /**
+     * Private method to handle validating and saving Book data.
+     */
+    private function saveBookData(Book $book, BookRequest $request): void
+    {
+        $validatedData = $request->validated(); // Use BookRequest validated data
+
+        // Assign validated data to the book object
+        $book->fill($validatedData);
+
+        // Convert display checkbox value to boolean
         $book->display = (bool) ($validatedData['display'] ?? false);
 
-        // Handle image upload and delete old one
+        // Handle image upload and delete old one if needed
         if ($request->hasFile('image')) {
             if ($book->image) {
                 @unlink(public_path('images/' . $book->image)); // Delete old image
@@ -147,16 +124,5 @@ class BookController extends Controller implements HasMiddleware
         }
 
         $book->save();
-        return redirect('/books/update/' . $book->id);
-    }
-
-    // Delete a Book
-    public function delete(Book $book): RedirectResponse
-    {
-        if ($book->image) {
-            @unlink(public_path('images/' . $book->image)); // Delete image file
-        }
-        $book->delete();
-        return redirect('/books');
     }
 }
