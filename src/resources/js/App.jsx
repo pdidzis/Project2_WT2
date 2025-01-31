@@ -22,21 +22,12 @@ const topBooks = [
   { "id": 2, "name": "Les Miserables", "description": "adsdfdadf", "author": "test2", "genre": "Action", "price": "13.00", "year": 153, "image": "http://localhost/images/679bd495152d3.jpg" }
 ];
 
-const selectedBook = {
-  "id": 2,
-  "name": "Les Miserables",
-  "description": "adsdfdadf",
-  "author": "test2",
-  "genre": "Action",
-  "price": "13.00",
-  "year": 153,
-  "image": "http://localhost/images/679bd495152d3.jpg"
-};
-
 const relatedBooks = [
-  { "id": 3, "name": "test4", "description": "hocus pocus", "author": "test2", "genre": "Action", "price": "17.00", "year": 2020, "image": null },
-  { "id": 1, "name": "test", "description": null, "author": "TEST2", "genre": "Action", "price": "15.00", "year": 950, "image": "http://localhost/images/679bb24c8bb2f.jpg" }
+  { "id": 3, "name": "Test Book 3", "image": "http://localhost/images/679c9878e66f5.png" },
+  { "id": 4, "name": "Test Book 4", "image": "http://localhost/images/679c98e268986.jpg" }
 ];
+
+const selectedBook = topBooks[1];
 
 // Homepage Component
 function Homepage({ handleBookSelection }) {
@@ -88,20 +79,80 @@ function SeeMoreBtn({ bookID, handleBookSelection }) {
   );
 }
 
-// Main Application Component
-export default function App() {
-  // Function to store Book ID in state
-  function handleBookSelection(bookID) {
-    alert("Selected ID " + bookID);
-  }
+// Go Back Button
+function GoBackBtn({ handleGoingBack }) {
+  return (
+    <button
+      className="inline-block rounded-full py-2 px-4 bg-neutral-500 hover:bg-neutral-400 text-neutral-50 cursor-pointer"
+      onClick={handleGoingBack}
+    >
+      Back
+    </button>
+  );
+}
 
+// Related Book View
+function RelatedBookView({ book, handleBookSelection }) {
+  return (
+    <div className="rounded-lg mb-4 md:basis-1/3 text-center">
+      <img
+        src={book.image}
+        alt={book.name}
+        className="h-40 mx-auto rounded-md border border-neutral-200"
+      />
+      <div className="p-4">
+        <h3 className="text-xl leading-7 font-light text-neutral-900 mb-4">
+          {book.name}
+        </h3>
+        <SeeMoreBtn bookID={book.id} handleBookSelection={handleBookSelection} />
+      </div>
+    </div>
+  );
+}
+
+// Related Book Section
+function RelatedBookSection({ handleBookSelection }) {
   return (
     <>
-      <Header />
-      <main className="mb-8 px-2 md:container md:mx-auto">
-        <Homepage handleBookSelection={handleBookSelection} />
-      </main>
-      <Footer />
+      <div className="flex flex-wrap justify-center">
+        <h2 className="text-3xl leading-8 font-light text-neutral-900 mb-4">
+          Similar books
+        </h2>
+      </div>
+      <div className="flex flex-wrap justify-center gap-4 md:flex-row md:space-x-4 md:flex-nowrap">
+        {relatedBooks.map((book) => (
+          <RelatedBookView
+            book={book}
+            key={book.id}
+            handleBookSelection={handleBookSelection}
+          />
+        ))}
+      </div>
     </>
   );
 }
+
+// Selected Book View
+function SelectedBookView({ selectedBookID, handleGoingBack }) {
+  return (
+    <div className="text-center">
+      <h2 className="text-xl font-bold mb-4">Selected Book ID: {selectedBookID}</h2>
+      <GoBackBtn handleGoingBack={handleGoingBack} />
+    </div>
+  );
+}
+
+// Book Page Component
+function BookPage({ selectedBookID, handleBookSelection, handleGoingBack }) {
+  return (
+    <>
+      <SelectedBookView
+        selectedBookID={selectedBookID}
+        handleGoingBack={handleGoingBack}
+      />
+      <RelatedBookSection handleBookSelection={handleBookSelection} />
+    </>
+  );
+}
+
+export default BookPage;
